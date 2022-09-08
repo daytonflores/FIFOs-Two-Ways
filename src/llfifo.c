@@ -3,15 +3,34 @@
  * \author Dayton Flores, dayton.flores@colorado.edu
  */
 
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "llfifo.h"
 
-typedef struct llfifo_s {
+#define EXIT_FAILURE_N (-1)
+
+ /**
+  * The llnode's main data structure.
+  * 
+  * Defined here as an incomplete type.
+  * Struct defined right below
+  */
+typedef struct llnode_s llnode_t;
+
+struct llnode_s {
 	void* data;
-	llfifo_t* next;
-} llfifo_t;
+	llnode_t* previous;
+	llnode_t* next;
+};
+
+struct llfifo_s {
+	llnode_t* head_free;
+	llnode_t* tail_free;
+	llnode_t* head_used;
+	llnode_t* tail_used;
+	int capacity;
+	int length;
+};
 
  /**
   * \fn llfifo_create(int capacity)
@@ -75,7 +94,7 @@ int llfifo_capacity(llfifo_t* fifo) {
 }
 
 /**
- * \fn llfifo_capacity(llfifo_t* fifo)
+ * \fn llfifo_destroy(llfifo_t* fifo)
  * \brief Teardown function: Frees all dynamically allocated memory. After calling this function, the fifo should not be used again!
  *
  * \param fifo The fifo in question
