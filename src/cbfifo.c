@@ -1,3 +1,8 @@
+/**
+ * \file cbfifo.c
+ * \author Dayton Flores, dayton.flores@colorado.edu
+ */
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -56,6 +61,6 @@ size_t cbfifo_length() {
  *
  * \return The capacity, in bytes, for the FIFO
  */
-size_t cbfifo_capacity(); {
+size_t cbfifo_capacity() {
 
 }

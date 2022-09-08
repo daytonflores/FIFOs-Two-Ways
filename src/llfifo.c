@@ -1,3 +1,8 @@
+/**
+ * \file llfifo.c
+ * \author Dayton Flores, dayton.flores@colorado.edu
+ */
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>

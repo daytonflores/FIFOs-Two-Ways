@@ -31,7 +31,7 @@ LINKLIBS=
 #	 -Wextra : turns on some, but not all, compiler warnings not controlled by -Wall
 #	 -Werror : makes all warnings into errors
 #	 -DDEBUG : flag to set a define for DEBUG
-CFLAGS= -g -Wall -Werror ${HDIR} ${SRCDIR} -DDEBUG
+CFLAGS= -g -Wall ${HDIR} ${SRCDIR} -DDEBUG
 
 # Name of Build Target
 TARGET= main

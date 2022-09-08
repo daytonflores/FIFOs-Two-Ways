@@ -1,0 +1,18 @@
+/**
+ * \file test_llfifo.h
+ * \author Dayton Flores, dayton.flores@colorado.edu
+ */
+
+#ifndef _TEST_LLFIFO_H_
+#define _TEST_LLFIFO_H_
+
+#include "llfifo.h"
+
+llfifo_t* test_llfifo_create(int capacity);
+int test_llfifo_enqueue(llfifo_t* fifo, void* element);
+void* test_llfifo_dequeue(llfifo_t* fifo);
+int test_llfifo_length(llfifo_t* fifo);
+int test_llfifo_capacity(llfifo_t* fifo);
+void test_llfifo_destroy(llfifo_t* fifo);
+
+#endif // _TEST_LLFIFO_H_
