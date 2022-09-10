@@ -42,6 +42,65 @@ struct llfifo_s {
   */
 llfifo_t* llfifo_create(int capacity) {
 
+	int i;
+	llfifo_t* fifo;
+	llnode_t* new_node;
+
+	// Ensure amount of free nodes to allocate space for is valid
+	if (capacity < 0) {
+		return NULL;
+	}
+
+	// Initialize FIFO for size 0
+	fifo->head_free = NULL;
+	fifo->tail_free = NULL;
+	fifo->head_used = NULL;
+	fifo->tail_used = NULL;
+	fifo->capacity = 0;
+	fifo->length = 0;
+
+	// Begin allocating memory for capacity number of free nodes
+	for (i = 0; i < capacity; i++) {
+
+		// Ensure malloc is successful for a new free node
+		new_node = (llnode_t*)malloc(sizeof(llnode_t));
+		if (new_node == NULL) {
+			return NULL;
+		}
+
+		// During 1st iteration
+		if (i == 0) {
+
+			// Special case of inserting into empty free list
+			new_node->data = NULL;
+			new_node->previous = NULL;
+			new_node->next = NULL;
+
+			// Set new free node as both free head & free tail
+			fifo->head_free = new_node;
+			fifo->tail_free = new_node;
+		}
+
+		// During all other iterations
+		else {
+
+			// Generic case of insert into free list containing at least 1 node
+			new_node->data = NULL;
+			new_node->previous = fifo->head_free;
+			new_node->next = NULL;
+
+			// Link old free head to new free node
+			fifo->head_free->next = new_node;
+
+			// Set new free node as free head only (do not touch free tail since there would be other nodes)
+			fifo->head_free = new_node;
+		}
+
+		// FIFO has gotten a new free node so capacity has increased
+		fifo->capacity++;
+	}
+
+	return fifo;
 }
 
 /**
