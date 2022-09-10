@@ -114,6 +114,93 @@ llfifo_t* llfifo_create(int capacity) {
  */
 int llfifo_enqueue(llfifo_t* fifo, void* element) {
 
+	llnode_t* new_node;
+
+	// Ensure the element to enqueue is valid
+	if (element == NULL) {
+		return EXIT_FAILURE_N;
+	}
+
+	// Allocate memory if no free nodes are available
+	if (fifo->length >= fifo->capacity) {
+		new_node = (llnode_t*)malloc(sizeof(llnode_t));
+		if (new_node == NULL) {
+			return EXIT_FAILURE_N;
+		}
+
+		// Special case of inserting into empty free list
+		new_node->data = NULL;
+		new_node->previous = NULL;
+		new_node->next = NULL;
+
+		// Set new free node as both free head & free tail
+		fifo->head_free = new_node;
+		fifo->tail_free = new_node;
+
+		// Free node has been added to fifo
+		fifo->capacity++;
+	}
+
+	// Grab the free tail to enqueue into used list
+	new_node = fifo->tail_free;
+
+	// During 1st iteration
+	if (fifo->length == 0) {
+
+		// If the last free node is being grabbed then set free list to empty
+		if (fifo->capacity - fifo->length == 1) {
+			fifo->head_free = NULL;
+			fifo->tail_free = NULL;
+		}
+
+		// Otherwise make free tail + 1 the new free tail
+		else
+		{
+			new_node->next->previous = NULL;
+		}
+
+
+		// Special case of inserting into empty used list
+		new_node->data = element;
+		new_node->previous = NULL;
+		new_node->next = NULL;
+
+		// Set new used node as both used head & used tail
+		fifo->head_used = new_node;
+		fifo->tail_used = new_node;
+	}
+
+	// During all other iterations
+	else {
+
+		// If the last free node is being grabbed then set free list to empty
+		if (fifo->capacity - fifo->length == 1) {
+			fifo->head_free = NULL;
+			fifo->tail_free = NULL;
+		}
+
+		// Otherwise make free tail + 1 the new free tail
+		else
+		{
+			new_node->next->previous = NULL;
+		}
+
+		// Generic case of insert into used list containing at least 1 node
+		new_node->data = element;
+		new_node->previous = fifo->head_used;
+		new_node->next = NULL;
+
+		// Link old used head to new used node
+		fifo->head_used->next = new_node;
+
+		// Set new used node as used head only (do not touch used tail since there would be other nodes)
+		fifo->head_used = new_node;
+	}
+
+	// Used node has been added to fifo
+	fifo->length++;
+
+	return fifo->length;
 }
 
 /**
