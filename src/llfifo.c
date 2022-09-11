@@ -222,6 +222,59 @@ int llfifo_enqueue(llfifo_t* fifo, void* element) {
  */
 void* llfifo_dequeue(llfifo_t* fifo) {
 
+	llnode_t* new_free_node;
+
+	// Ensure at least 1 used note exists in FIFO to dequeue
+	if (fifo->length == 0) {
+		return NULL;
+	}
+
+	// Grab the used tail to dequeue
+	new_free_node = fifo->tail_used;
+
+	// Special case of used list becoming empty after grabbing this used node
+	if (fifo->length == 1) {
+		fifo->head_used = NULL;
+		fifo->tail_used = NULL;
+	}
+
+	// Generic case of used list having at least 1 used node left after grabbing this used node
+	else
+	{
+		// Unlink new free node from used list
+		fifo->tail_used->next->previous = NULL;
+
+		// Set new used tail node
+		fifo->tail_used = fifo->tail_used->next;
+
+	}
+
+	// Special case of inserting used node into empty free list
+	if (fifo->capacity == fifo->length) {
+		new_free_node->previous = NULL;
+		new_free_node->next = NULL;
+
+		// Set new free node as both free head & free tail in this special case
+		fifo->head_free = new_free_node;
+		fifo->tail_free = new_free_node;
+	}
+
+	// Generic case of inserting into used list containing at least 1 node
+	else {
+		new_free_node->previous = fifo->head_free;
+		new_free_node->previous->next = new_free_node;
+
+		// Unlink new free node from used list
+		new_free_node->next = NULL;
+
+		// Set new free node as free head only (do not touch free tail since there would be other nodes)
+		fifo->head_free = new_free_node;
+	}
+
+	// Used node has been dequeued from FIFO
+	fifo->length--;
+
+	return new_free_node;
 }
 
 /**
