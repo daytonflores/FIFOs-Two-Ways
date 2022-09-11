@@ -286,7 +286,7 @@ void* llfifo_dequeue(llfifo_t* fifo) {
  * \return Returns the number of elements currently on the FIFO
  */
 int llfifo_length(llfifo_t* fifo) {
-
+	return fifo->length;
 }
 
 /**
@@ -298,7 +298,7 @@ int llfifo_length(llfifo_t* fifo) {
  * \return Returns the current capacity, in number of elements, for the FIFO
  */
 int llfifo_capacity(llfifo_t* fifo) {
-
+	return fifo->capacity;
 }
 
 /**
