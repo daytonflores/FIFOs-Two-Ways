@@ -44,10 +44,16 @@ llfifo_t* llfifo_create(int capacity) {
 
 	int i;
 	llfifo_t* fifo;
-	llnode_t* new_node;
+	llnode_t* new_free_node;
 
 	// Ensure amount of free nodes to allocate space for is valid
 	if (capacity < 0) {
+		return NULL;
+	}
+
+	// Ensure malloc is successful for a new FIFO list
+	fifo = (llfifo_t*)malloc(sizeof(llfifo_t));
+	if (fifo == NULL) {
 		return NULL;
 	}
 
@@ -63,37 +69,33 @@ llfifo_t* llfifo_create(int capacity) {
 	for (i = 0; i < capacity; i++) {
 
 		// Ensure malloc is successful for a new free node
-		new_node = (llnode_t*)malloc(sizeof(llnode_t));
-		if (new_node == NULL) {
+		new_free_node = (llnode_t*)malloc(sizeof(llnode_t));
+		if (new_free_node == NULL) {
 			return NULL;
 		}
 
-		// During 1st iteration
+		// Special case of inserting free node into empty free list
 		if (i == 0) {
-
-			// Special case of inserting into empty free list
-			new_node->data = NULL;
-			new_node->previous = NULL;
-			new_node->next = NULL;
+			new_free_node->data = NULL;
+			new_free_node->previous = NULL;
+			new_free_node->next = NULL;
 
 			// Set new free node as both free head & free tail
-			fifo->head_free = new_node;
-			fifo->tail_free = new_node;
+			fifo->head_free = new_free_node;
+			fifo->tail_free = new_free_node;
 		}
 
-		// During all other iterations
+		// Generic case of insert into free list containing at least 1 free node
 		else {
-
-			// Generic case of insert into free list containing at least 1 node
-			new_node->data = NULL;
-			new_node->previous = fifo->head_free;
-			new_node->next = NULL;
+			new_free_node->data = NULL;
+			new_free_node->previous = fifo->head_free;
+			new_free_node->next = NULL;
 
 			// Link old free head to new free node
-			fifo->head_free->next = new_node;
+			fifo->head_free->next = new_free_node;
 
 			// Set new free node as free head only (do not touch free tail since there would be other nodes)
-			fifo->head_free = new_node;
+			fifo->head_free = new_free_node;
 		}
 
 		// FIFO has gotten a new free node so capacity has increased
@@ -114,87 +116,94 @@ llfifo_t* llfifo_create(int capacity) {
  */
 int llfifo_enqueue(llfifo_t* fifo, void* element) {
 
-	llnode_t* new_node;
+	llnode_t* new_used_node;
 
 	// Ensure the element to enqueue is valid
 	if (element == NULL) {
 		return EXIT_FAILURE_N;
 	}
 
-	// Allocate memory if no free nodes are available
-	if (fifo->length >= fifo->capacity) {
-		new_node = (llnode_t*)malloc(sizeof(llnode_t));
-		if (new_node == NULL) {
+	// Allocate memory for an extra free node if no free nodes are available
+	if (fifo->length == fifo->capacity) {
+		new_used_node = (llnode_t*)malloc(sizeof(llnode_t));
+		if (new_used_node == NULL) {
 			return EXIT_FAILURE_N;
 		}
 
 		// Special case of inserting into empty free list
-		new_node->data = NULL;
-		new_node->previous = NULL;
-		new_node->next = NULL;
+		new_used_node->data = NULL;
+		new_used_node->previous = NULL;
+		new_used_node->next = NULL;
 
 		// Set new free node as both free head & free tail
-		fifo->head_free = new_node;
-		fifo->tail_free = new_node;
+		fifo->head_free = new_used_node;
+		fifo->tail_free = new_used_node;
 
 		// Free node has been added to fifo
 		fifo->capacity++;
 	}
 
 	// Grab the free tail to enqueue into used list
-	new_node = fifo->tail_free;
+	new_used_node = fifo->tail_free;
 
-	// During 1st iteration
+	// Special case of inserting used node into empty used list
 	if (fifo->length == 0) {
 
-		// If the last free node is being grabbed then set free list to empty
+		// Special case of free list becoming empty after grabbing this free node
 		if (fifo->capacity - fifo->length == 1) {
 			fifo->head_free = NULL;
 			fifo->tail_free = NULL;
 		}
 
-		// Otherwise make free tail + 1 the new free tail
+		// Generic case of free list having at least 1 free node left after grabbing this free node
 		else
 		{
-			new_node->next->previous = NULL;
-		}
+			// Unlink new used node from free list
+			fifo->tail_free->next->previous = NULL;
 
+			// Set new free node as free head only (do not touch free tail since there would be other nodes)
+			fifo->tail_free = fifo->tail_free->next;
+		}
 
 		// Special case of inserting into empty used list
-		new_node->data = element;
-		new_node->previous = NULL;
-		new_node->next = NULL;
+		new_used_node->data = element;
+		new_used_node->previous = NULL;
+		new_used_node->next = NULL;
 
-		// Set new used node as both used head & used tail
-		fifo->head_used = new_node;
-		fifo->tail_used = new_node;
+		// Set new used node as both used head & used tail in this special case
+		fifo->head_used = new_used_node;
+		fifo->tail_used = new_used_node;
 	}
 
-	// During all other iterations
+	// Generic case of inserting into used list containing at least 1 used node
 	else {
 
-		// If the last free node is being grabbed then set free list to empty
+		// Special case of free list becoming empty after grabbing this free node
 		if (fifo->capacity - fifo->length == 1) {
 			fifo->head_free = NULL;
 			fifo->tail_free = NULL;
 		}
 
-		// Otherwise make free tail + 1 the new free tail
+		// Generic case of free list having at least 1 free node left after grabbing this free node
 		else
 		{
-			new_node->next->previous = NULL;
+			// Set new used tail node
+			fifo->tail_free->next->previous = NULL;
+
+			// Set new free node as free head only (do not touch free tail since there would be other nodes)
+			fifo->tail_free = fifo->tail_free->next;
 		}
 
-		// Generic case of insert into used list containing at least 1 node
-		new_node->data = element;
-		new_node->previous = fifo->head_used;
-		new_node->next = NULL;
+		// Generic case of inserting into used list containing at least 1 node
+		new_used_node->data = element;
+		new_used_node->previous = fifo->head_used;
+		new_used_node->next = NULL;
 
 		// Link old used head to new used node
-		fifo->head_used->next = new_node;
+		fifo->head_used->next = new_used_node;
 
 		// Set new used node as used head only (do not touch used tail since there would be other nodes)
-		fifo->head_used = new_node;
+		fifo->head_used = new_used_node;
 	}
 
 	// Used node has been added to fifo
