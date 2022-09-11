@@ -3,6 +3,7 @@
  * \author Dayton Flores, dayton.flores@colorado.edu
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "llfifo.h"
@@ -286,6 +287,7 @@ void* llfifo_dequeue(llfifo_t* fifo) {
  * \return Returns the number of elements currently on the FIFO
  */
 int llfifo_length(llfifo_t* fifo) {
+
 	return fifo->length;
 }
 
@@ -298,6 +300,7 @@ int llfifo_length(llfifo_t* fifo) {
  * \return Returns the current capacity, in number of elements, for the FIFO
  */
 int llfifo_capacity(llfifo_t* fifo) {
+
 	return fifo->capacity;
 }
 
@@ -311,4 +314,58 @@ int llfifo_capacity(llfifo_t* fifo) {
  */
 void llfifo_destroy(llfifo_t* fifo) {
 
+	int i;
+	llnode_t* node_to_destroy;
+
+	// Check if there are any nodes to destroy
+	if (fifo->capacity > 0) {
+		
+		// Destroy all used nodes
+		if (fifo->length > 0) {
+
+			for (i = 1; i <= fifo->length; i++) {
+
+				node_to_destroy = fifo->tail_used;
+
+				// Save next node to destroy
+				fifo->tail_used = fifo->tail_used->next;
+
+				free(node_to_destroy);
+			}
+
+			// Ensure all used nodes have been destroyed
+			assert(fifo->length == i);
+
+			// Update FIFO to reflect destroying all used nodes
+			fifo->capacity = (fifo->capacity - i);
+			fifo->length = (fifo->length - i);
+		}
+
+		// Destroy all free nodes
+		if (fifo->capacity > 0) {
+
+			for (i = 1; i <= fifo->capacity; i++) {
+
+				node_to_destroy = fifo->tail_free;
+
+				// Save next node to destroy
+				fifo->tail_free = fifo->tail_free->next;
+
+				free(node_to_destroy);
+			}
+
+			// Ensure all free nodes have been destroyed
+			assert(fifo->capacity == i);
+
+			// Update FIFO to reflect destroying all free nodes
+			fifo->capacity = (fifo->capacity - i);
+		}
+
+	}
+
+	// Ensure all nodes have been destroyed
+	assert(fifo->capacity == 0);
+
+	// Destroy FIFO only after all nodes have been destroyed
+	free(fifo);
 }
