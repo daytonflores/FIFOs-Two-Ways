@@ -55,53 +55,55 @@ extern cbfifo_t cbfifo;
  */
 size_t cbfifo_enqueue(void* buf, size_t nbyte) {
 
+	size_t bytes_enqueued = 0;
 	size_t i;
 
-	// Ensure buf is a valid buffer
+	// Ensure buf is a valid buffer to read from
 	if (buf == NULL) {
 		return EXIT_FAILURE_N;
 	}
 
-	// Return error if trying to enqueue non-zero number of bytes into a full buffer
+	// Return error if trying to enqueue non-zero number of bytes into a full FIFO
 	if (cbfifo.is_full == true && nbyte > 0) {
 		return EXIT_FAILURE_N;
 	}
 
-	// Return success immediately if trying to enqueue zero bytes into buffer
+	// Return 0 immediately if trying to enqueue zero bytes into FIFO
 	if (nbyte == 0) {
-		return 0;
+		return bytes_enqueued;
 	}
 
 	// Begin enqueueing byte-by-byte
 	for (i = 0; i < nbyte; i++) {
 
-		// Case of cbfifo not being full
+		// Case of FIFO not being full
 		if (cbfifo.is_full == false) {
 
-			// Enqueue the new byte into the buffer
+			// Enqueue byte from buffer into FIFO
 			cbfifo.buf[cbfifo.head] = *((char*)(buf) + i);
 
-			// Increment cbfifo.head without modulus operation. This assumes cbfifo.capacity is a power of 2
+			// Increment FIFO head for circular buffer without modulus operation. This assumes FIFO capacity is a power of 2
 			cbfifo.head = (cbfifo.head + 1) & (cbfifo.capacity - 1);
 
-			// Check if buffer is full after enqueueing this new byte
+			// Check if FIFO is full after enqueueing byte
 			if (cbfifo.head == cbfifo.tail) {
 				cbfifo.is_full = true;
 			}
 
-			// Successfully enqueued new byte
+			// Successfully enqueued byte
 			(cbfifo.length)++;
+			bytes_enqueued++;
 		}
 
-		// Case of cbfifo being full
+		// Case of FIFO being full
 		else {
 
-			// Do not enqueue anymore bytes into the buffer
+			// Do not enqueue anymore bytes into FIFO
 			break;
 		}
 	}
 
-	return (++i);
+	return (bytes_enqueued);
 }
 
 /**
@@ -122,6 +124,55 @@ size_t cbfifo_enqueue(void* buf, size_t nbyte) {
  */
 size_t cbfifo_dequeue(void* buf, size_t nbyte) {
 
+	size_t bytes_dequeued = 0;
+	size_t i;
+
+	// Ensure buf is a valid buffer to write to
+	if (buf == NULL) {
+		return EXIT_FAILURE_N;
+	}
+
+	// Return 0 immediately if trying to dequeue from empty FIFO
+	if (cbfifo.length == 0) {
+		return bytes_dequeued;
+	}
+
+	// Return 0 immediately if trying to dequeue zero bytes into FIFO
+	if (nbyte == 0) {
+		return bytes_dequeued;
+	}
+
+	// Begin dequeueing byte-by-byte
+	for (i = 0; i < nbyte; i++) {
+
+		// Case of FIFO having bytes available to dequeue
+		if (cbfifo.length > 0) {
+
+			// Dequeue byte from FIFO into buffer
+			*((char*)(buf) + i) = cbfifo.buf[cbfifo.tail];
+
+			// Increment FIFO tail for circular buffer without modulus operation. This assumes FIFO capacity is a power of 2
+			cbfifo.tail = (cbfifo.tail + 1) & (cbfifo.capacity - 1);
+
+			// Check if byte was just dequeued from a full FIFO
+			if (cbfifo.is_full == true) {
+				cbfifo.is_full = false;
+			}
+
+			// Successfully dequeued byte from FIFO
+			(cbfifo.length)--;
+			bytes_dequeued++;
+		}
+
+		// Case of FIFO being empty
+		else {
+
+			// Do not dequeue anymore bytes from FIFO
+			break;
+		}
+	}
+
+	return (bytes_dequeued);
 }
 
 /**
