@@ -8,22 +8,39 @@
 #include <stdlib.h>
 #include "llfifo.h"
 
-#define EXIT_FAILURE_N (-1)
+#define EXIT_FAILURE_N ((int)(-1))
 
- /**
-  * The llnode's main data structure.
-  * 
-  * Defined here as an incomplete type.
-  * Struct defined right below
-  */
+/**
+ * \typedef llnode_t
+ * \brief Allows struct llnode_s to be instantiated as llnode_t
+ */
 typedef struct llnode_s llnode_t;
 
+/**
+ * \struct llnode_s
+ * \brief Any linked list is comprised of these llnode_t (nodes)
+ *
+ * \detail void* data - Points to data
+ * \detail llnode_t* - previous Points to node before in the linked list (towards the tail). If NULL then the node is the tail
+ * \detail llnode_t* - next Points to node next in the linked list (towards the head). If NULL then the node is the head
+ */
 struct llnode_s {
 	void* data;
 	llnode_t* previous;
 	llnode_t* next;
 };
 
+/**
+  * \struct llfifo_s
+  * \brief Keeps track of 2 separate lists of nodes, free + used. Free nodes are available to be enqueued with data while used nodes are available to be dequeued
+  *
+  * \detail llnode_t* head_free - Points to head node of free list. If NULL then the list of free nodes is empty
+  * \detail llnode_t* tail_free - Points to tail node of free list. If NULL then the list of free nodes is empty
+  * \detail llnode_t* head_used - Points to head node of used list. If NULL then the list of used nodes is empty
+  * \detail llnode_t* tail_used - Points to tail node of used list. If NULL then the list of used nodes is empty
+  * \detail int capacity - The total number of nodes between both free list + used list that memory has been allocated for
+  * \detail int length - The number of nodes currently in the used list
+ */
 struct llfifo_s {
 	llnode_t* head_free;
 	llnode_t* tail_free;
