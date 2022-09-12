@@ -10,7 +10,7 @@
 #include "cbfifo.h"
 
 #define BUF_SIZE ((size_t)(128))
-#define EXIT_FAILURE_N (-1)
+#define EXIT_FAILURE_N ((size_t)(-1))
 
 /**
  * \typedef cbfifo_t
@@ -34,6 +34,7 @@ struct cbfifo_s {
 	size_t head;
 	size_t tail;
 	size_t capacity;
+	size_t length;
 	bool is_full;
 };
 
@@ -54,7 +55,53 @@ extern cbfifo_t cbfifo;
  */
 size_t cbfifo_enqueue(void* buf, size_t nbyte) {
 
+	size_t i;
 
+	// Ensure buf is a valid buffer
+	if (buf == NULL) {
+		return EXIT_FAILURE_N;
+	}
+
+	// Return error if trying to enqueue non-zero number of bytes into a full buffer
+	if (cbfifo.is_full == true && nbyte > 0) {
+		return EXIT_FAILURE_N;
+	}
+
+	// Return success immediately if trying to enqueue zero bytes into buffer
+	if (nbyte == 0) {
+		return 0;
+	}
+
+	// Begin enqueueing byte-by-byte
+	for (i = 0; i < nbyte; i++) {
+
+		// Case of cbfifo not being full
+		if (cbfifo.is_full == false) {
+
+			// Enqueue the new byte into the buffer
+			cbfifo.buf[cbfifo.head] = *((char*)(buf) + i);
+
+			// Increment cbfifo.head without modulus operation. This assumes cbfifo.capacity is a power of 2
+			cbfifo.head = (cbfifo.head + 1) & (cbfifo.capacity - 1);
+
+			// Check if buffer is full after enqueueing this new byte
+			if (cbfifo.head == cbfifo.tail) {
+				cbfifo.is_full = true;
+			}
+
+			// Successfully enqueued new byte
+			(cbfifo.length)++;
+		}
+
+		// Case of cbfifo being full
+		else {
+
+			// Do not enqueue anymore bytes into the buffer
+			break;
+		}
+	}
+
+	return (++i);
 }
 
 /**
