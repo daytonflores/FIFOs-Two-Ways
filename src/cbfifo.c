@@ -185,6 +185,7 @@ size_t cbfifo_dequeue(void* buf, size_t nbyte) {
  */
 size_t cbfifo_length() {
 
+	return cbfifo.length;
 }
 
 /**
@@ -197,4 +198,5 @@ size_t cbfifo_length() {
  */
 size_t cbfifo_capacity() {
 
+	return cbfifo.capacity;
 }
