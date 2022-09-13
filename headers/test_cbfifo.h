@@ -8,6 +8,7 @@
 
 #include "cbfifo.h"
 
+void cbfifo_dump_state();
 int test_cbfifo_enqueue(void* buf, size_t nbyte);
 int test_cbfifo_dequeue(void* buf, size_t nbyte);
 int test_cbfifo_length();

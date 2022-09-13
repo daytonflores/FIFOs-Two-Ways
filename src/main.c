@@ -7,7 +7,7 @@
 #include "test_cbfifo.h"
 #include "test_llfifo.h"
 
-#define BUF_SIZE ((size_t)(128))
+#define BUF_SIZE ((size_t)(8))
 
 /**
  * \typedef cbfifo_t
@@ -42,13 +42,7 @@ struct cbfifo_s {
 cbfifo_t cbfifo = { .head = 0, .tail = 0, .capacity = BUF_SIZE, .length = 0, .is_full = false };
 
 int main(void) {
-	//printf("Hello world!\n");
-
-	llfifo_t* llfifo;
-
-	llfifo = llfifo_create(3);
-
-	llfifo_dump_state(llfifo);
+	printf("Hello world!\n");
 
 	return EXIT_SUCCESS;
 }
