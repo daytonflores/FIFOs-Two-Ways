@@ -8,12 +8,13 @@
 
 #include "llfifo.h"
 
-void llfifo_dump_state(llfifo_t* fifo);
-int test_llfifo_create(int capacity);
-int test_llfifo_enqueue(llfifo_t* fifo, void* element);
-int test_llfifo_dequeue(llfifo_t* fifo);
-int test_llfifo_length(llfifo_t* fifo);
-int test_llfifo_capacity(llfifo_t* fifo);
+void test_llfifo();
+int test_llfifo_create(int capacity, int max_nodes);
+int test_llfifo_enqueue(llfifo_t* fifo, void* element, int max_nodes);
+int test_llfifo_dequeue(llfifo_t* fifo, int max_nodes);
+int test_llfifo_length(llfifo_t* fifo, int max_nodes);
+int test_llfifo_capacity(llfifo_t* fifo, int max_nodes);
 int test_llfifo_destroy(llfifo_t* fifo);
+void llfifo_dump_state(llfifo_t* fifo, int max_nodes);
 
 #endif // _TEST_LLFIFO_H_

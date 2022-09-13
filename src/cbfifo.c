@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "cbfifo.h"
 
-#define BUF_SIZE ((size_t)(8))
+#define CB_SIZE ((size_t)(8))
 #define EXIT_FAILURE_N ((size_t)(-1))
 
 /**
@@ -21,7 +21,7 @@ typedef struct cbfifo_s cbfifo_t;
  * \struct cbfifo_s
  * \brief Circular buffer of fixed size
  *
- * \detail uint8_t buf[BUF_SIZE] - Buffer of fixed size. It is BUF_SIZE number of bytes large
+ * \detail uint8_t buf[CB_SIZE] - Buffer of fixed size. It is CB_SIZE number of bytes large
  * \detail size_t head - Current head. This increments just after elements are added to buf
  * \detail size_t tail - Current tail. This increments just after elements are removed from buf
  * \detail size_t capacity - The amount of bytes the buffer can store at a time
@@ -29,7 +29,7 @@ typedef struct cbfifo_s cbfifo_t;
  * \detail bool is_full - Flag to keep track of status of the buf
  */
 struct cbfifo_s {
-	uint8_t buf[BUF_SIZE];
+	uint8_t buf[CB_SIZE];
 	size_t head;
 	size_t tail;
 	size_t capacity;

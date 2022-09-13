@@ -136,6 +136,11 @@ int llfifo_enqueue(llfifo_t* fifo, void* element) {
 
 	llnode_t* new_used_node;
 
+	// Ensure the fifo to enqueue to is valid
+	if (fifo == NULL) {
+		return EXIT_FAILURE_N;
+	}
+
 	// Ensure the element to enqueue is valid
 	if (element == NULL) {
 		return EXIT_FAILURE_N;
@@ -242,6 +247,11 @@ void* llfifo_dequeue(llfifo_t* fifo) {
 
 	llnode_t* new_free_node;
 
+	// Ensure the fifo to dequeue to is valid
+	if (fifo == NULL) {
+		return NULL;
+	}
+
 	// Ensure at least 1 used note exists in FIFO to dequeue
 	if (fifo->length == 0) {
 		return NULL;
@@ -305,7 +315,12 @@ void* llfifo_dequeue(llfifo_t* fifo) {
  */
 int llfifo_length(llfifo_t* fifo) {
 
-	return fifo->length;
+	if (fifo != NULL) {
+		return fifo->length;
+	}
+	else {
+		return EXIT_FAILURE_N;
+	}
 }
 
 /**
@@ -318,7 +333,12 @@ int llfifo_length(llfifo_t* fifo) {
  */
 int llfifo_capacity(llfifo_t* fifo) {
 
-	return fifo->capacity;
+	if (fifo != NULL) {
+		return fifo->capacity;
+	}
+	else {
+		return EXIT_FAILURE_N;
+	}
 }
 
 /**
@@ -333,6 +353,10 @@ void llfifo_destroy(llfifo_t* fifo) {
 
 	int i;
 	llnode_t* node_to_destroy;
+
+	if (fifo == NULL) {
+		return;
+	}
 
 	// Check if there are any nodes to destroy
 	if (fifo->capacity > 0) {
@@ -351,6 +375,7 @@ void llfifo_destroy(llfifo_t* fifo) {
 			}
 
 			// Ensure all used nodes have been destroyed
+			--i;
 			assert(fifo->length == i);
 
 			// Update FIFO to reflect destroying all used nodes
@@ -372,6 +397,7 @@ void llfifo_destroy(llfifo_t* fifo) {
 			}
 
 			// Ensure all free nodes have been destroyed
+			--i;
 			assert(fifo->capacity == i);
 
 			// Update FIFO to reflect destroying all free nodes
