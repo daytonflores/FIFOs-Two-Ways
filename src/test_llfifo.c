@@ -11,10 +11,12 @@
 #include "llfifo.h"
 #include "test_llfifo.h"
 
+#define LL_SIZE ((int)(3))
+
 #define GREEN "\x1B[32m"
 #define RESET "\x1B[0m"
+
 #define EXIT_FAILURE_N ((int)(-1))
-#define LL_SIZE ((int)(3))
 
 #define TEST_LLFIFO_CREATE
 #define TEST_LLFIFO_ENQUEUE
@@ -66,6 +68,8 @@ struct llfifo_s {
 /**
  * \fn void test_llfifo()
  * \brief Runs unit tests for happy cases + failure cases + boundary cases for each llfifo function
+ * 
+ * \param N/A
  *
  * \return N/A
  */
@@ -892,6 +896,10 @@ void llfifo_dump_state(llfifo_t* fifo, int max_nodes) {
 
 			if (skip_to_head == true) {
 				break;
+			}
+
+			if (((i + 1) + 1) >= max_nodes) {
+				skip_to_head = true;
 			}
 		}
 	}

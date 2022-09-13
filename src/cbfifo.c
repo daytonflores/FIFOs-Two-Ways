@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "cbfifo.h"
 
-#define CB_SIZE ((size_t)(8))
+#define CB_SIZE ((size_t)(128))
 #define EXIT_FAILURE_N ((size_t)(-1))
 
 /**

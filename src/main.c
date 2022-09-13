@@ -6,7 +6,7 @@
 #include "test_cbfifo.h"
 #include "test_llfifo.h"
 
-#define CB_SIZE ((size_t)(8))
+#define CB_SIZE ((size_t)(128))
 #define LL_SIZE ((int)(3))
 
 /**
@@ -43,7 +43,8 @@ cbfifo_t cbfifo = { .head = 0, .tail = 0, .capacity = CB_SIZE, .length = 0, .is_
 
 int main(void) {
 	
-	test_llfifo();
+	//test_llfifo();
+	test_cbfifo();
 
 	return EXIT_SUCCESS;
 }
