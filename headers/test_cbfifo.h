@@ -8,9 +8,9 @@
 
 #include "cbfifo.h"
 
-size_t test_cbfifo_enqueue(void* buf, size_t nbyte);
-size_t test_cbfifo_dequeue(void* buf, size_t nbyte);
-size_t test_cbfifo_length();
-size_t test_cbfifo_capacity();
+int test_cbfifo_enqueue(void* buf, size_t nbyte);
+int test_cbfifo_dequeue(void* buf, size_t nbyte);
+int test_cbfifo_length();
+int test_cbfifo_capacity();
 
 #endif // _TEST_CBFIFO_H_

@@ -3,7 +3,6 @@
  * \author Dayton Flores, dayton.flores@colorado.edu
  */
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -45,7 +44,7 @@ struct cbfifo_s {
 extern cbfifo_t cbfifo;
 
 /**
- * \fn cbfifo_enqueue(void* buf, size_t nbyte)
+ * \fn size_t cbfifo_enqueue(void* buf, size_t nbyte)
  * \brief Enqueues data onto the FIFO, up to the limit of the available FIFO capacity.
  *
  * \param buf Pointer to the data
@@ -107,7 +106,7 @@ size_t cbfifo_enqueue(void* buf, size_t nbyte) {
 }
 
 /**
- * \fn cbfifo_dequeue(void* buf, size_t nbyte)
+ * \fn size_t cbfifo_dequeue(void* buf, size_t nbyte)
  * \brief Attempts to remove ("dequeue") up to nbyte bytes of data from the FIFO. Removed data will be copied into the buffer pointed to by buf.
  *
  * \param buf Destination for the dequeued data
@@ -176,7 +175,7 @@ size_t cbfifo_dequeue(void* buf, size_t nbyte) {
 }
 
 /**
- * \fn cbfifo_length()
+ * \fn size_t cbfifo_length()
  * \brief Returns the number of bytes currently on the FIFO.
  *
  * \param N/A
@@ -189,7 +188,7 @@ size_t cbfifo_length() {
 }
 
 /**
- * \fn cbfifo_capacity()
+ * \fn size_t cbfifo_capacity()
  * \brief Returns the FIFO's capacity
  *
  * \param N/A
