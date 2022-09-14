@@ -83,10 +83,10 @@ void test_llfifo() {
 	// ------------------- //
 	//		Create llfifo and attempt to initialize 2 nodes in free list + 0 nodes in used list. Display max 2 nodes from free list + 2 nodes from used list
 	assert(test_llfifo_create(2, 2) == EXIT_SUCCESS);
-	//		Create llfifo and attempt to initialize 9 nodes in free list + 0 nodes in used list. Display max 8 nodes from free list + 8 nodes from used list
-	assert(test_llfifo_create(9, 8) == EXIT_SUCCESS);
-	//		Create llfifo and attempt to initialize 100 nodes in free list + 0 nodes in used list. Display max 4 nodes from free list + 4 nodes from used list
-	assert(test_llfifo_create(100, 4) == EXIT_SUCCESS);
+	//		Create llfifo and attempt to initialize 5 nodes in free list + 0 nodes in used list. Display max 5 nodes from free list + 5 nodes from used list
+	assert(test_llfifo_create(5, 5) == EXIT_SUCCESS);
+	//		Create llfifo and attempt to initialize 20 nodes in free list + 0 nodes in used list. Display max 4 nodes from free list + 4 nodes from used list
+	assert(test_llfifo_create(20, 4) == EXIT_SUCCESS);
 
 	// ------------------- //
 	// Failure Test Cases  //

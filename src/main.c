@@ -43,6 +43,9 @@ cbfifo_t cbfifo = { .head = 0, .tail = 0, .capacity = CB_SIZE, .length = 0, .is_
 
 int main(void) {
 	
+	// It is easier to test llfifo + cbfifo separately (by having at least 1 commented out below at a time) since outputs of success
+	// will be printed at the tail-end of the function. Running both llfifo + cbfifo texts 
+	// might be tough to see the success/error messages for the first of llfifo or cbfifo between them
 	test_llfifo();
 	test_cbfifo();
 
