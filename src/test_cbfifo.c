@@ -323,7 +323,7 @@ int test_cbfifo_dequeue(void* buf, size_t nbyte, size_t max_bytes) {
 
 	int i;
 	int length;
-	size_t limit;
+	int limit;
 
 	if (nbyte == 0) {
 		limit = 0;
@@ -344,7 +344,7 @@ int test_cbfifo_dequeue(void* buf, size_t nbyte, size_t max_bytes) {
 		printf("\t\tDEQD : Empty buffer\n");
 	}
 	else {
-		printf("\t\tDEQD : [%03u] to [%03u]\n", 0, (limit - 1));
+		printf("\t\tDEQD : [%03u] to [%03d]\n", 0, (limit - 1));
 
 		for (i = 0; i < limit; i++) {
 			
@@ -435,10 +435,10 @@ void cbfifo_dump_state(size_t max_bytes) {
 
 	// Print state of FIFO
 	printf("\tcbfifo at %p\n", (void*)(&cbfifo));
-	printf("\tcbfifo.head is %u\n", cbfifo.head);
-	printf("\tcbfifo.tail is %u\n", cbfifo.tail);
-	printf("\tcbfifo.capacity is %u\n", cbfifo.capacity);
-	printf("\tcbfifo.length is %u\n", cbfifo.length);
+	printf("\tcbfifo.head is %u\n", (unsigned int)cbfifo.head);
+	printf("\tcbfifo.tail is %u\n", (unsigned int)cbfifo.tail);
+	printf("\tcbfifo.capacity is %u\n", (unsigned int)cbfifo.capacity);
+	printf("\tcbfifo.length is %u\n", (unsigned int)cbfifo.length);
 	printf("\tcbfifo.is_full is %s\n", (cbfifo.is_full == true) ? "true" : "false");
 
 
@@ -449,7 +449,7 @@ void cbfifo_dump_state(size_t max_bytes) {
 		printf("\t\tFREE : Empty list\n");
 	}
 	else {
-		printf("\t\tFREE : [%03u] to [%03u]\n", cbfifo.head, (cbfifo.tail - 1) & (cbfifo.capacity - 1));
+		printf("\t\tFREE : [%03u] to [%03u]\n", (unsigned int)cbfifo.head, (unsigned int)((cbfifo.tail - 1) & (cbfifo.capacity - 1)));
 	}
 
 	printf("\t\t-----------------------------------------\n");
@@ -459,20 +459,20 @@ void cbfifo_dump_state(size_t max_bytes) {
 		printf("\t\tUSED : Empty list\n");
 	}
 	else {
-		printf("\t\tUSED : [%03u] to [%03u]\n", cbfifo.tail, (cbfifo.head - 1) & (cbfifo.capacity - 1));
+		printf("\t\tUSED : [%03u] to [%03u]\n", (unsigned int)cbfifo.tail, (unsigned int)((cbfifo.head - 1) & (cbfifo.capacity - 1)));
 
 		for (i = 0; i < cbfifo.length; i++) {
 
 			if (i == 0) {
 				index = cbfifo.tail;
-				printf("\n\t\t   USED[%03d]=%c\t", index, cbfifo.buf[index]);
+				printf("\n\t\t   USED[%03d]=%c\t", (unsigned int)index, cbfifo.buf[index]);
 			}
 			else {
 
 				if (((i + 1) >= max_bytes) && ((i + 1) < cbfifo.length)) {
 					index = cbfifo.head - 1;
 					printf("\n\t\t   ...");
-					printf("\n\t\t-> USED[%03d]=%c\t", index, cbfifo.buf[index]);
+					printf("\n\t\t-> USED[%03d]=%c\t", (unsigned int)index, cbfifo.buf[index]);
 					break;
 				}
 				else {
@@ -483,7 +483,7 @@ void cbfifo_dump_state(size_t max_bytes) {
 						printf("\n\t\t");
 					}
 
-					printf("-> USED[%03d]=%c\t", index, cbfifo.buf[index]);
+					printf("-> USED[%03d]=%c\t", (unsigned int)index, cbfifo.buf[index]);
 				}
 			}
 		}
