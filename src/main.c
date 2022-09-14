@@ -43,7 +43,7 @@ cbfifo_t cbfifo = { .head = 0, .tail = 0, .capacity = CB_SIZE, .length = 0, .is_
 
 int main(void) {
 	
-	//test_llfifo();
+	test_llfifo();
 	test_cbfifo();
 
 	return EXIT_SUCCESS;

@@ -17,12 +17,13 @@
 #define GREEN "\x1B[32m"
 #define RESET "\x1B[0m"
 
+#define ELEMENTS_PER_ROW ((int)(8))
 #define EXIT_FAILURE_N ((int)(-1))
 
 #define TEST_CBFIFO_ENQUEUE
-//#define TEST_CBFIFO_DEQUEUE
-//#define TEST_CBFIFO_CAPACITY
-//#define TEST_CBFIFO_LENGTH
+#define TEST_CBFIFO_DEQUEUE
+#define TEST_CBFIFO_CAPACITY
+#define TEST_CBFIFO_LENGTH
 
  /**
   * \typedef cbfifo_t
@@ -69,9 +70,9 @@ void test_cbfifo() {
 	// Set second parameter to the amount of bytes to read from buffer and store into cbfifo
 	// Set third parameter to how many bytes you want to dump from cbfifo
 
-	char element1_enqueue[17] = "element1_enqueue";
-	char element2_enqueue[17] = "element2_enqueue";
-	char element3_enqueue[17] = "element3_enqueue";
+	char element1_enqueue[17] = "element1_enqueue*";
+	char element2_enqueue[17] = "element2_enqueue*";
+	char element3_enqueue[17] = "element3_enqueue*";
 	char element4_enqueue[128] = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 	// ------------------- //
@@ -95,278 +96,133 @@ void test_cbfifo() {
 	// ------------------- //
 	//		Enqueue over the available space to cbfifo capacity 128, length 68. Resulting length will be 128
 	assert(test_cbfifo_enqueue((void*)element4_enqueue, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue over the available space to cbfifo capacity 128, length 128. Resulting length will be 128
+	assert(test_cbfifo_enqueue((void*)element4_enqueue, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
 
 #endif
 
 #ifdef TEST_CBFIFO_DEQUEUE
-	// Set first parameter to llfifo to test with
-	// Set second parameter to char* pointer (technically this can be any pointer but the dump function only prints %s in printf so for nice input stick with char*)
-	// Set third parameter to how many nodes you want to dump from each of free list + used list
+	// Set first parameter to the buffer to write to (from cbfifo)
+	// Set second parameter to the amount of bytes to read from cbfifo and store into buffer
+	// Set third parameter to how many bytes you want to dump from cbfifo + buffer
 
-	char element1_dequeue[17] = "element1_dequeue";
-	char element2_dequeue[17] = "element2_dequeue";
-	char element3_dequeue[17] = "element3_dequeue";
-	char element4_dequeue[17] = "element4_dequeue";
-
-	llfifo_t* llfifo_dequeue;
-	llfifo_dequeue = llfifo_create(LL_SIZE);
+	char buf_dequeue[128] = "";
+	char element1_dequeue[7] = "abcdefg";
+	char element2_dequeue[9] = "hijklmnop";
+	char element3_dequeue[10] = "qrstuvwxyz";
+	char element4_dequeue[128] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 	// ------------------- //
 	// Happy Test Cases    //
 	// ------------------- //
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element1_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element2_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element3_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 3, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 3, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 3, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element3_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element2_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 3, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element1_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 3, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 3, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_SUCCESS);
+	//		Dequeue 128 bytes to buffer from cbfifo capacity 128, length 128. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, 128, CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue 7 bytes of element1 to cbfifo capacity 128, length 0. Resulting length will be 7
+	assert(test_cbfifo_enqueue((void*)element1_dequeue, 7, CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue 7 bytes to buffer from cbfifo capacity 128, length 7. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, 7, CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue 5 bytes of element2 to cbfifo capacity 128, length 0. Resulting length will be 5
+	assert(test_cbfifo_enqueue((void*)element2_dequeue, 5, CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue 2 bytes to buffer from cbfifo capacity 128, length 5. Resulting length will be 3
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, 2, CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue over the available bytes to buffer from cbfifo capacity 128, length 3. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, 128, CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue 10 bytes of element3 to cbfifo capacity 128, length 0. Resulting length will be 10
+	assert(test_cbfifo_enqueue((void*)element3_dequeue, 10, CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue over the available bytes to buffer from cbfifo capacity 128, length 10. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, 128, CB_SIZE) == EXIT_SUCCESS);
 
 	// ------------------- //
 	// Failure Test Cases  //
 	// ------------------- //
-	//		Attempt to dequeue element from NULL llfifo
-	assert(test_llfifo_dequeue(NULL, LL_SIZE) == EXIT_FAILURE);
+	//		Attempt to dequeue data to NULL pointer from cbfifo
+	assert(test_cbfifo_dequeue(NULL, 128, CB_SIZE) == EXIT_FAILURE);
 
 	// ------------------- //
 	// Boundary Test Cases //
 	// ------------------- //
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE) == EXIT_FAILURE);
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element1_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element2_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element3_dequeue, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element4 to llfifo capacity 3, length 3. Resulting capacity will be 4. Resulting length will be 4
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element4_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 4, length 4. Resulting length will be 3
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 4, length 3. Resulting length will be 4
-	assert(test_llfifo_enqueue(llfifo_dequeue, (void*)element1_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 4, length 4. Resulting length will be 3
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 4, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element4 from llfifo capacity 4, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 4, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_dequeue, LL_SIZE + 1) == EXIT_FAILURE);
-
-	llfifo_destroy(llfifo_dequeue);
+	//		Enqueue over the available space to cbfifo capacity 128, length 0. Resulting length will be 128
+	assert(test_cbfifo_enqueue((void*)element4_dequeue, (size_t)(-1), 20) == EXIT_SUCCESS);
+	//		Dequeue over the available bytes to buffer from cbfifo capacity 128, length 128. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_dequeue, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
 
 #endif
 
 #ifdef TEST_CBFIFO_CAPACITY
-	// Set first parameter to llfifo to test with
-	// Set second parameter to how many nodes you want to dump from each of free list + used list
+	// Set first parameter to how many bytes you want to dump from cbfifo
 
-	char element1_capacity[18] = "element1_capacity";
-	char element2_capacity[18] = "element2_capacity";
-	char element3_capacity[18] = "element3_capacity";
-	char element4_capacity[18] = "element4_capacity";
-
-	llfifo_t* llfifo_capacity;
-	llfifo_capacity = llfifo_create(LL_SIZE);
+	char buf_capacity[128] = "";
+	char element1_capacity[18] = "element1_capacity*";
+	char element2_capacity[128] = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 	// ------------------- //
 	// Happy Test Cases    //
 	// ------------------- //
-	//		Grab capacity of llfifo capacity 3, length 0. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element1_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 1. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element2_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 2. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element3_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 3. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 3, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 2. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 3, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 1. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 3, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 0. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE) == EXIT_FAILURE);
-	//		Grab capacity of llfifo capacity 3, length 0. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element1_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 1. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element2_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 2. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element3_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 3, length 3. Answer should be 3
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element4 to llfifo capacity 3, length 3. Resulting capacity will be 4. Resulting length will be 4
-	assert(test_llfifo_enqueue(llfifo_capacity, (void*)element4_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 4, length 4. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 4, length 4. Resulting length will be 3
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 4, length 3. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 4, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 4, length 2. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 4, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 4, length 1. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Dequeue element4 from llfifo capacity 4, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Grab capacity of llfifo capacity 4, length 0. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_capacity, LL_SIZE + 1) == EXIT_FAILURE);
-	//		Grab capacity of llfifo capacity 4, length 0. Answer should be 4
-	assert(test_llfifo_capacity(llfifo_capacity, LL_SIZE + 1) == EXIT_SUCCESS);
+	//		Grab capacity of cbfifo capacity 128, length 0. Answer should be 128
+	assert(test_cbfifo_capacity(CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue 18 bytes of element1 to cbfifo capacity 128, length 18. Resulting length will be 18
+	assert(test_cbfifo_enqueue((void*)element1_capacity, 18, CB_SIZE) == EXIT_SUCCESS);
+	//		Grab capacity of cbfifo capacity 128, length 18. Answer should be 128
+	assert(test_cbfifo_capacity(CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue 7 bytes to buffer from cbfifo capacity 128, length 18. Resulting length will be 11
+	assert(test_cbfifo_dequeue((void*)buf_capacity, 7, CB_SIZE) == EXIT_SUCCESS);
+	//		Grab capacity of cbfifo capacity 128, length 11. Answer should be 128
+	assert(test_cbfifo_capacity(CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue over the available space to cbfifo capacity 128, length 11. Resulting length will be 128
+	assert(test_cbfifo_enqueue((void*)element2_capacity, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
+	//		Grab capacity of cbfifo capacity 128, length 128. Answer should be 128
+	assert(test_cbfifo_capacity(CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue over the available bytes to buffer from cbfifo capacity 128, length 128. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_capacity, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
+	//		Grab capacity of cbfifo capacity 128, length 0. Answer should be 128
+	assert(test_cbfifo_capacity(CB_SIZE) == EXIT_SUCCESS);
 
 	// ------------------- //
 	// Failure Test Cases  //
 	// ------------------- //
-	//		Attempt to grab capacity from NULL llfifo
-	assert(test_llfifo_capacity(NULL, LL_SIZE) == EXIT_FAILURE);
 
 	// ------------------- //
 	// Boundary Test Cases //
 	// ------------------- //
 
-
-	llfifo_destroy(llfifo_capacity);
 #endif
 
 #ifdef TEST_CBFIFO_LENGTH
-	// Set first parameter to llfifo to test with
-	// Set second parameter to how many nodes you want to dump from each of free list + used list
+	// Set first parameter to how many bytes you want to dump from cbfifo
 
-	char element1_length[16] = "element1_length";
-	char element2_length[16] = "element2_length";
-	char element3_length[16] = "element3_length";
-	char element4_length[16] = "element4_length";
-
-	llfifo_t* llfifo_length;
-	llfifo_length = llfifo_create(LL_SIZE);
+	char buf_length[128] = "";
+	char element1_length[18] = "element1_length*";
+	char element2_length[128] = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 	// ------------------- //
 	// Happy Test Cases    //
 	// ------------------- //
-	//		Grab length of llfifo capacity 3, length 0. Answer should be 0
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element1_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 1. Answer should be 1
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element2_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 2. Answer should be 2
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element3_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 3. Answer should be 3
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 3, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 2. Answer should be 2
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 3, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 1. Answer should be 1
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 3, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 0. Answer should be 0
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_FAILURE);
-	//		Grab length of llfifo capacity 3, length 0. Answer should be 0
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element1 to llfifo capacity 3, length 0. Resulting length will be 1
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element1_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 1. Answer should be 1
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element2 to llfifo capacity 3, length 1. Resulting length will be 2
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element2_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 2. Answer should be 2
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element3 to llfifo capacity 3, length 2. Resulting length will be 3
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element3_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 3, length 3. Answer should be 3
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Enqueue element4 to llfifo capacity 3, length 3. Resulting length will be 4
-	assert(test_llfifo_enqueue(llfifo_length, (void*)element4_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 4, length 4. Answer should be 4
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element1 from llfifo capacity 4, length 4. Resulting length will be 3
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 4, length 3. Answer should be 3
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element2 from llfifo capacity 4, length 3. Resulting length will be 2
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 4, length 2. Answer should be 2
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element3 from llfifo capacity 4, length 2. Resulting length will be 1
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 4, length 1. Answer should be 1
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Dequeue element4 from llfifo capacity 4, length 1. Resulting length will be 0
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Grab length of llfifo capacity 4, length 0. Answer should be 0
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
-	//		Attempt to dequeue NULL element from llfifo
-	assert(test_llfifo_dequeue(llfifo_length, LL_SIZE) == EXIT_FAILURE);
-	//		Grab length of llfifo capacity 4, length 0. Answer should be 0
-	assert(test_llfifo_length(llfifo_length, LL_SIZE) == EXIT_SUCCESS);
+	//		Grab length of cbfifo capacity 128, length 0. Answer should be 0
+	assert(test_cbfifo_length(CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue 18 bytes of element1 to cbfifo capacity 128, length 18. Resulting length will be 18
+	assert(test_cbfifo_enqueue((void*)element1_length, 18, CB_SIZE) == EXIT_SUCCESS);
+	//		Grab length of cbfifo capacity 128, length 18. Answer should be 18
+	assert(test_cbfifo_length(CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue 7 bytes to buffer from cbfifo capacity 128, length 18. Resulting length will be 11
+	assert(test_cbfifo_dequeue((void*)buf_length, 7, CB_SIZE) == EXIT_SUCCESS);
+	//		Grab length of cbfifo capacity 128, length 11. Answer should be 11
+	assert(test_cbfifo_length(CB_SIZE) == EXIT_SUCCESS);
+	//		Enqueue over the available space to cbfifo capacity 128, length 11. Resulting length will be 128
+	assert(test_cbfifo_enqueue((void*)element2_length, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
+	//		Grab length of cbfifo capacity 128, length 128. Answer should be 128
+	assert(test_cbfifo_length(CB_SIZE) == EXIT_SUCCESS);
+	//		Dequeue over the available bytes to buffer from cbfifo capacity 128, length 128. Resulting length will be 0
+	assert(test_cbfifo_dequeue((void*)buf_length, (size_t)(-1), CB_SIZE) == EXIT_SUCCESS);
+	//		Grab length of cbfifo capacity 128, length 0. Answer should be 0
+	assert(test_cbfifo_length(CB_SIZE) == EXIT_SUCCESS);
 
 	// ------------------- //
 	// Failure Test Cases  //
 	// ------------------- //
-	//		Attempt to grab length from NULL llfifo
-	assert(test_llfifo_length(NULL, LL_SIZE) == EXIT_FAILURE);
 
 	// ------------------- //
 	// Boundary Test Cases //
 	// ------------------- //
-
-
-	llfifo_destroy(llfifo_length);
 #endif
 
 #ifdef TEST_CBFIFO_ENQUEUE
@@ -395,10 +251,48 @@ void test_cbfifo() {
  */
 int test_cbfifo_enqueue(void* buf, size_t nbyte, size_t max_bytes) {
 
+	int i;
 	int length;
+	int limit;
+
+	if (nbyte == 0) {
+		limit = 0;
+	}
+	else if (nbyte > (cbfifo.capacity - cbfifo.length)) {
+		limit = cbfifo.capacity - cbfifo.length;
+	}
+	else {
+		limit = nbyte;
+	}
 
 	length = cbfifo_enqueue(buf, nbyte);
 	cbfifo_dump_state(max_bytes);
+
+	printf("\t\t-----------------------------------------\n");
+
+	if (limit == 0 || buf == NULL) {
+		printf("\t\tENQD : Empty buffer\n");
+	}
+	else {
+		printf("\t\tENQD : [%03u] to [%03u]\n", 0, (limit - 1));
+
+		for (i = 0; i < limit; i++) {
+
+			if (i == 0) {
+				printf("\n\t\t   ENQD[%03d]=%c\t", i, *(((char*)(buf)) + i));
+			}
+			else {
+
+				if (i % ELEMENTS_PER_ROW == 0) {
+					printf("\n\t\t");
+				}
+
+				printf("-> ENQD[%03d]=%c\t", i, *(((char*)(buf)) + i));
+			}
+		}
+
+		printf("\n");
+	}
 
 	if (length != EXIT_FAILURE_N) {
 		return EXIT_SUCCESS;
@@ -425,9 +319,58 @@ int test_cbfifo_enqueue(void* buf, size_t nbyte, size_t max_bytes) {
  * any number of bytes will result in a return of 0 from
  * cbfifo_dequeue.
  */
-//int test_cbfifo_dequeue(void* buf, size_t nbyte, size_t max_bytes) {
-//
-//}
+int test_cbfifo_dequeue(void* buf, size_t nbyte, size_t max_bytes) {
+
+	int i;
+	int length;
+	size_t limit;
+
+	if (nbyte == 0) {
+		limit = 0;
+	}
+	else if (nbyte > cbfifo.length) {
+		limit = cbfifo.length;
+	}
+	else {
+		limit = nbyte;
+	}
+
+	length = cbfifo_dequeue(buf, nbyte);
+	cbfifo_dump_state(max_bytes);
+
+	printf("\t\t-----------------------------------------\n");
+	
+	if (limit == 0 || buf == NULL) {
+		printf("\t\tDEQD : Empty buffer\n");
+	}
+	else {
+		printf("\t\tDEQD : [%03u] to [%03u]\n", 0, (limit - 1));
+
+		for (i = 0; i < limit; i++) {
+			
+			if (i == 0) {
+				printf("\n\t\t   DEQD[%03d]=%c\t", i, *(((char*)(buf)) + i));
+			}
+			else {
+
+				if (i % ELEMENTS_PER_ROW == 0) {
+					printf("\n\t\t");
+				}
+
+				printf("-> DEQD[%03d]=%c\t", i, *(((char*)(buf)) + i));
+			}
+		}
+
+		printf("\n");
+	}
+
+	if (length != EXIT_FAILURE_N) {
+		return EXIT_SUCCESS;
+	}
+	else {
+		return EXIT_FAILURE;
+	}
+}
 
 /**
  * \fn int test_cbfifo_length(size_t max_bytes)
@@ -437,9 +380,20 @@ int test_cbfifo_enqueue(void* buf, size_t nbyte, size_t max_bytes) {
  *
  * \return If successful, returns EXIT_SUCCESS (0). In the case of an error, the function prints the failure and returns EXIT_FAILURE (1)
  */
-//int test_cbfifo_length(size_t max_bytes) {
-//
-//}
+int test_cbfifo_length(size_t max_bytes) {
+
+	int length;
+
+	length = cbfifo_length();
+	cbfifo_dump_state(max_bytes);
+
+	if (length != EXIT_FAILURE_N) {
+		return EXIT_SUCCESS;
+	}
+	else {
+		return EXIT_FAILURE;
+	}
+}
 
 /**
  * \fn int test_cbfifo_capacity(size_t max_bytes)
@@ -449,9 +403,20 @@ int test_cbfifo_enqueue(void* buf, size_t nbyte, size_t max_bytes) {
  *
  * \return If successful, returns EXIT_SUCCESS (0). In the case of an error, the function prints the failure and returns EXIT_FAILURE (1)
  */
-//int test_cbfifo_capacity(size_t max_bytes) {
-//
-//}
+int test_cbfifo_capacity(size_t max_bytes) {
+
+	int capacity;
+
+	capacity = cbfifo_capacity();
+	cbfifo_dump_state(max_bytes);
+
+	if (capacity != EXIT_FAILURE_N) {
+		return EXIT_SUCCESS;
+	}
+	else {
+		return EXIT_FAILURE;
+	}
+}
 
 /**
   * \fn void cbfifo_dump_state()
@@ -463,10 +428,8 @@ int test_cbfifo_enqueue(void* buf, size_t nbyte, size_t max_bytes) {
   */
 void cbfifo_dump_state(size_t max_bytes) {
 
-	bool skip_to_head;
 	int i;
 	size_t index;
-	uint8_t byte;
 
 	printf("\n***************************NEW CBFIFO****************************\n");
 
@@ -481,122 +444,50 @@ void cbfifo_dump_state(size_t max_bytes) {
 
 	printf("\t\t-----------------------------------------\n");
 
-	// Print list of free bytes
-	if (cbfifo.is_full == false) {
+	// Print range of free bytes
+	if (cbfifo.is_full == true) {
 		printf("\t\tFREE : Empty list\n");
 	}
-	else if (max_bytes == 0) {
-		printf("\t\tDisplaying %d out of %d free bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-	}
-	else if (max_bytes == 1) {
-		printf("\t\tDisplaying %d out of %d free bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-
-		index = (cbfifo.tail);
-		byte = (cbfifo.buf[index]);
-
-		printf("\t\tFREE[%u] : %c\n", index, byte);
-
-		printf("\t\t...\n");
-	}
 	else {
-
-		skip_to_head = false;
-
-		printf("\t\tDisplaying %d out of %d free bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-
-		for (i = 0; i < (cbfifo.length); i++) {
-
-			if (i == 0) {
-				index = (cbfifo.tail);
-				byte = (cbfifo.buf[index]);
-			}
-			else {
-				if (((i + 1) >= max_bytes) && (skip_to_head == true)) {
-					index = (cbfifo.head);
-					byte = (cbfifo.buf[index]);
-					i = (cbfifo.length) - 1;
-					printf("\t\t...\n");
-					printf("\t\t|\n");
-					printf("\t\tV\n");
-				}
-				else {
-					index = (index + 1) & (cbfifo.capacity - 1);
-					byte = (cbfifo.buf[index]);
-					printf("\t\t|\n");
-					printf("\t\tV\n");
-				}
-			}
-
-			printf("\t\tFREE[%u] : %c\n", index, byte);
-
-			if (skip_to_head == true) {
-				break;
-			}
-
-			if (((i + 1)) >= max_bytes) {
-				skip_to_head = true;
-			}
-		}
+		printf("\t\tFREE : [%03u] to [%03u]\n", cbfifo.head, (cbfifo.tail - 1) & (cbfifo.capacity - 1));
 	}
-
 
 	printf("\t\t-----------------------------------------\n");
 
-	// Print list of used bytes
+	// Print range + list of used bytes
 	if ((cbfifo.length) == 0) {
 		printf("\t\tUSED : Empty list\n");
 	}
-	else if (max_bytes == 0) {
-		printf("\t\tDisplaying %d out of %d used bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-	}
-	else if (max_bytes == 1) {
-		printf("\t\tDisplaying %d out of %d used bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-
-		index = (cbfifo.tail);
-		byte = (cbfifo.buf[index]);
-
-		printf("\t\tUSED[%u] : %c\n", index, byte);
-
-		printf("\t\t...\n");
-	}
 	else {
+		printf("\t\tUSED : [%03u] to [%03u]\n", cbfifo.tail, (cbfifo.head - 1) & (cbfifo.capacity - 1));
 
-		skip_to_head = false;
-
-		printf("\t\tDisplaying %d out of %d used bytes\n", (max_bytes > (cbfifo.length) ? (cbfifo.length) : (max_bytes)), (cbfifo.length));
-
-		for (i = 0; i < (cbfifo.length); i++) {
+		for (i = 0; i < cbfifo.length; i++) {
 
 			if (i == 0) {
-				index = (cbfifo.tail);
-				byte = (cbfifo.buf[index]);
+				index = cbfifo.tail;
+				printf("\n\t\t   USED[%03d]=%c\t", index, cbfifo.buf[index]);
 			}
 			else {
-				if (((i + 1) >= max_bytes) && (skip_to_head == true)) {
-					index = (cbfifo.head);
-					byte = (cbfifo.buf[index]);
-					i = (cbfifo.length) - 1;
-					printf("\t\t...\n");
-					printf("\t\t|\n");
-					printf("\t\tV\n");
+
+				if (((i + 1) >= max_bytes) && ((i + 1) < cbfifo.length)) {
+					index = cbfifo.head - 1;
+					printf("\n\t\t   ...");
+					printf("\n\t\t-> USED[%03d]=%c\t", index, cbfifo.buf[index]);
+					break;
 				}
 				else {
+
 					index = (index + 1) & (cbfifo.capacity - 1);
-					byte = (cbfifo.buf[index]);
-					printf("\t\t|\n");
-					printf("\t\tV\n");
+
+					if (i % ELEMENTS_PER_ROW == 0) {
+						printf("\n\t\t");
+					}
+
+					printf("-> USED[%03d]=%c\t", index, cbfifo.buf[index]);
 				}
 			}
-
-			printf("\t\tUSED[%u] : %c\n", index, byte);
-
-			if (skip_to_head == true) {
-				break;
-			}
-
-			if (((i + 1)) >= max_bytes) {
-				skip_to_head = true;
-			}
 		}
+
+		printf("\n");
 	}
 }

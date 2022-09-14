@@ -62,9 +62,9 @@ size_t cbfifo_enqueue(void* buf, size_t nbyte) {
 		return EXIT_FAILURE_N;
 	}
 
-	// Return error if trying to enqueue non-zero number of bytes into a full FIFO
-	if (cbfifo.is_full == true && nbyte > 0) {
-		return EXIT_FAILURE_N;
+	// Return 0 immediately if trying to enqueue into a full FIFO
+	if (cbfifo.is_full == true) {
+		return bytes_enqueued;
 	}
 
 	// Return 0 immediately if trying to enqueue zero bytes into FIFO
